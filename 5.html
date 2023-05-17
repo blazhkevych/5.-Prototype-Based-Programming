@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+
+	<style>
+		/* CSS styles for the page layout */
+		body {
+			font-family: Arial, sans-serif;
+		}
+
+		.input-field {
+			margin-bottom: 10px;
+		}
+	</style>
+
+</head>
+
+<body>
+	<!-- HTML elements for user input and output -->
+	<div>
+		<label for="colorInput">Please input color:</label>
+		<input type="text" id="colorInput" class="input-field" placeholder="Enter color (rgb format)"
+			title="Enter color in the rgb format 'rgb(255, 0, 0)'">
+	</div>
+
+	<div>
+		<label for="textInput">Please input text:</label>
+		<input type="text" id="textInput" class="input-field" placeholder="Enter text">
+	</div>
+	<button onclick="printText()">Print text</button>
+	<button onclick="printInkCount()">Print count of ink</button>
+	<button onclick="refillInk()">Refill Ink</button>
+	<button onclick="clearOutput()">Clear</button>
+
+	<br>
+
+	<!-- Output area to display printed text and ink count -->
+	<div id="output"></div>
+
+	<script>
+		// Implementation of SimpleMarker class
+		class SimpleMarker {
+			constructor(color, ink) {
+				this.color = color;
+				this.ink = ink;
+			}
+
+			print(text) {
+				const output = document.getElementById('output');
+				const characters = text.replace(/\s/g, '').length;
+				const inkNeeded = characters * 0.5; // Each non-whitespace character requires 0.5% ink
+
+				if (inkNeeded <= this.ink) {
+					// There is enough ink to print the text
+					this.ink -= inkNeeded;
+					output.innerHTML += `<p style="color: ${this.color}">${text}</p>`;
+				} else {
+					// Not enough ink to print the text
+					const availableInk = Math.floor(this.ink / 0.5); // Calculate the maximum number of characters that can be printed
+					const partialText = text.substr(0, availableInk);
+					output.innerHTML += `<p style="color: ${this.color}">${partialText}</p>`;
+					output.innerHTML += '<p style="color: red">Not enough ink to print the entire text!</p>';
+				}
+			}
+		}
+
+		// Implementation of RefuelingMarker class that extends SimpleMarker
+		class RefuelingMarker extends SimpleMarker {
+			refill() {
+				this.ink = 100; // Refill ink to 100%
+				const output = document.getElementById('output');
+				output.innerHTML += '<p>Ink refilled!</p>';
+			}
+		}
+
+		// Create an instance of SimpleMarker outside of the event handlers
+		const refuelingMarker = new RefuelingMarker('', 100);
+
+		// Function to print text using the selected refuelingMarker color
+		function printText() {
+			const colorInput = document.getElementById('colorInput').value;
+			const textInput = document.getElementById('textInput').value;
+
+			if (colorInput && textInput) {
+				refuelingMarker.color = colorInput; // Set the refuelingMarker color
+				refuelingMarker.print(textInput);
+			}
+		}
+
+		// Function to display the remaining ink in the refuelingMarker
+		function printInkCount() {
+			const output = document.getElementById('output');
+			output.innerHTML += `<p style="color: ${refuelingMarker.color}">Ink count: ${refuelingMarker.ink}%</p>`;
+		}
+
+		// Function to refill the ink in the refuelingMarker
+		function refillInk() {
+			const colorInput = document.getElementById('colorInput').value;
+
+			if (colorInput) {
+				refuelingMarker.refill();
+			}
+		}
+
+		// Function to clear the output area
+		function clearOutput() {
+			const output = document.getElementById('output');
+			output.innerHTML = '';
+		}
+	</script>
+
+</body>
+
+</html>
